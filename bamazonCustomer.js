@@ -51,6 +51,15 @@ function placeOrder(){
         var itemId = answer.id;
         var itemQty = answer.item_qty;
         console.log(itemId, itemQty);
-        // checkProductDb(itemId,itemQty);
+        checkOrder(itemId,itemQty);
     })
 }
+
+function checkOrder(itemId, itemQty){
+    connection.query("SELECT stock_quantity FROM products WHERE item_id=?", [itemId], function(err,result){
+        if (err) throw err;
+        console.log(result[0].stock_quantity);
+      
+    });
+}
+    
