@@ -1,5 +1,6 @@
 var mysql = require ("mysql");
 var inquirer = require ("inquirer");
+var colors = require('colors');
 
 var connection = mysql.createConnection({
     host:"localhost",
@@ -38,7 +39,7 @@ function placeOrder(){
         {
           name:"item_qty",
           type: "input",
-          message: "Please specify the quantity ",
+          message: "Please specify the quantity: ",
           validate: function(value){
               if (isNaN(value)===false){
                   return true;
@@ -56,10 +57,57 @@ function placeOrder(){
 }
 
 function checkOrder(itemId, itemQty){
-    connection.query("SELECT stock_quantity FROM products WHERE item_id=?", [itemId], function(err,result){
+    connection.query("SELECT stock_quantity,price FROM products WHERE item_id=?", [itemId], function(err,result){
         if (err) throw err;
-        console.log(result[0].stock_quantity);
+        // console.log(result);
+        var databaseQty = result[0].stock_quantity;
+        var itemCost = result[0].price;
+        if (databaseQty<itemQty){
+            console.log("Sorry, insufficient Quantity");
+        } else {
+            var updateDatabaseQty = databaseQty-itemQty;
+
+            console.log("One moment while your order is being processed");
+            updateProductQty(itemId,updateDatabaseQty,itemQty,itemCost);
+        }
       
     });
 }
-    
+
+function updateProductQty(itemId,updatedQty,itemQty,itemCost){
+    var query = connection.query(
+    "UPDATE products SET ? WHERE ?",
+    [
+      {
+        stock_quantity:updatedQty
+      },
+      {
+        item_id: itemId
+      }
+    ],
+    function(err, res) {
+    //   console.log(res.affectedRows + " products updated!\n");
+        var purchasePrice = itemQty * itemCost;
+        console.log("Your total cost is $" + purchasePrice +" . Thank you for your purchase!");
+        promptForShopping();
+    });
+}
+
+function promptForShopping(){
+    inquirer.prompt([
+        {
+          name:"shopping",
+          type: "confirm",
+          message: "Would you like to shop again?",
+        } 
+    ])
+    .then(function(answer){
+        if(answer===true){
+            displayItems();
+         } else {
+            console.log(colors.yellow.bold("Thanks for shopping with us. Please visit us again soon!"));
+        }
+    });
+}
+
+
