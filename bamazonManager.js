@@ -40,9 +40,9 @@ function startInquiry(){
         replenishInventory();
         break;
       
-        // case "Add new product":
-        //   addNewProduct();
-        //   break; 
+        case "Add new product":
+        addNewProduct();
+        break; 
       }
     });
 }
@@ -58,7 +58,7 @@ function viewInventory(){
         }
         console.log("\n \n");
         console.log("******************************");
-        startInquiry();
+        promptForNextAction();
     });
 }
 
@@ -75,7 +75,7 @@ function viewLowInventory(){
         }
         console.log("\n \n");
         console.log("******************************");
-        startInquiry();
+        promptForNextAction();
     });
  }
 
@@ -138,9 +138,80 @@ function replenishInventory(){
                   console.log("New inventory for "+ chosenItem + " is " + updatedInventory);
                   console.log("\n \n");
                   console.log("******************************");
-                  startInquiry();
+                  promptForNextAction();
                 }
             );
         });
     }); 
 } 
+
+function addNewProduct(){
+    inquirer
+    .prompt([
+      {
+        name: "item",
+        type: "input",
+        message: "What item would you like to add?"
+      },
+      {
+        name: "department",
+        type: "input",
+        message: "Specify department name: "
+      },
+      {
+        name: "price",
+        type: "input",
+        message: "Specify the price: ",
+        validate: function(value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          return false;
+        }
+      },
+      {
+        name: "quantity",
+        type: "input",
+        message: "Specify quantity: ",
+      } 
+    ])
+    .then(function(answer) {
+    console.log(answer);
+         connection.query(
+        "INSERT INTO products SET ?",
+        {
+          product_name: answer.item,
+          department_name: answer.department,
+          price: answer.price,
+          stock_quantity: answer.quantity
+        },
+        function(err) {
+          if (err) throw err;
+          console.log("New item  has been successfully added!");
+          console.log("\n \n");
+          console.log("******************************");
+          promptForNextAction();
+        }
+      );
+   });
+}
+
+function promptForNextAction(){
+    inquirer.prompt([
+        {
+          name:"action",
+          type: "confirm",
+          message: "Would you like to see the main menu?",
+        } 
+    ])
+    .then(function(answer){
+        if(answer.action===true){
+            console.log("\n \n");
+             console.log("******************************");
+            startInquiry();
+         } else {
+            console.log(colors.yellow.bold("Thank you! Good bye!"));
+            connection.end();
+        }
+    });
+}

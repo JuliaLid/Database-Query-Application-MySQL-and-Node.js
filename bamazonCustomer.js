@@ -106,6 +106,7 @@ function promptForShopping(){
             displayItems();
          } else {
             console.log(colors.yellow.bold("Thanks for shopping with us. Please visit us again soon!"));
+            connection.end();
         }
     });
 }
