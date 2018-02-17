@@ -29,16 +29,16 @@ function startInquiry(){
     //   console.log(answer.report_option);
       switch (answer.report_option) {
         case "View Current Inventory report":
-          viewInventory();
-          break;
+        viewInventory();
+        break;
       
-        // case "View Low Inventory report":
-        //   viewLowInventory();
-        //   break;
+        case "View Low Inventory report":
+        viewLowInventory();
+        break;
       
-        // case "Replenish inventory levels":
-        //   replenishInventory();
-        //   break;
+        case "Replenish inventory levels":
+        replenishInventory();
+        break;
       
         // case "Add new product":
         //   addNewProduct();
@@ -54,10 +54,104 @@ function viewInventory(){
 
         for (var i = 0; i <result.length; i++){
             var res = result[i];
-            console.log("Item "+ res.item_id + "|" + res.product_name + "|" + res.price + " dollars" + "|" + "res.stock_quantity");
+            console.log("Item "+ res.item_id + "|" + res.product_name + "|" + res.price + " dollars" + "|" + res.stock_quantity);
         }
         console.log("\n \n");
         console.log("******************************");
         startInquiry();
     });
+}
+
+function viewLowInventory(){
+    connection.query("SELECT item_id, product_name,stock_quantity,price FROM products", function(err,result){
+        if (err) throw err;
+        for (var i = 0; i <result.length; i++){
+           
+            var lowInventory = result[i].stock_quantity;
+            // console.log(lowInventory);
+            if(lowInventory <100) {
+                console.log("Item "+ result[i].item_id + "| " + result[i].product_name + "| " +  result[i].stock_quantity);
+            } 
+        }
+        console.log("\n \n");
+        console.log("******************************");
+        startInquiry();
+    });
+ }
+
+
+function replenishInventory(){
+    connection.query("SELECT * FROM products", function(err, results) {
+        if (err) throw err;
+        // console.log(results.length);
+        // once you have the items, prompt the user for which they'd like to bid on
+        
+        inquirer
+          .prompt([
+            {
+              name: "select_product",
+              type: "rawlist",
+              choices: function() {
+                var productArray = [];
+                for (var i = 0; i < results.length; i++) {
+                  productArray.push(results[i].product_name);
+                }
+                return productArray;
+              },
+              message: "Which item would you like to add inventory to?"
+            },
+            {
+                name: "add_inventory",
+                type: "input",
+                message: "How many units would you like to add?",
+                validate: function(value) {
+                    if (isNaN(value) === false) {
+                      return true;
+                    }
+                    return false;
+                  }
+              }
+        ])
+          .then(function(answer) {
+            // get the information of the chosen item
+            // console.log(answer.select_product);
+            // console.log(answer.add_inventory);
+            
+            var chosenItem;
+            var chosenItemInventory;
+            var updatedInventory
+            for (var i = 0; i < results.length; i++) {
+              if (results[i].product_name === answer.select_product) {
+                chosenItem = results[i].product_name;
+                chosenItemInventory = results[i].stock_quantity;
+                updatedInventory = chosenItemInventory + parseInt(answer.add_inventory);
+                // console.log(chosenItem);
+                // console.log(chosenItemInventory);
+                // console.log(updatedInventory);
+              }
+            }
+            /*
+            connection.query(
+                "UPDATE products SET ? WHERE ?",
+                [
+                  {
+                    highest_bid: answer.bid
+                  },
+                  {
+                    id: chosenItem.id
+                  }
+                ],
+                function(error) {
+                  if (error) throw err;
+                  console.log("Bid placed successfully!");
+                  start();
+                }
+              );
+              */
+            
+            
+          });
+         
+      }); 
+      
 }
