@@ -102,7 +102,7 @@ function promptForShopping(){
         } 
     ])
     .then(function(answer){
-        if(answer===true){
+        if(answer.shopping===true){
             displayItems();
          } else {
             console.log(colors.yellow.bold("Thanks for shopping with us. Please visit us again soon!"));

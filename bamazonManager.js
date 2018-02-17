@@ -80,11 +80,11 @@ function viewLowInventory(){
  }
 
 
+
 function replenishInventory(){
     connection.query("SELECT * FROM products", function(err, results) {
         if (err) throw err;
         // console.log(results.length);
-        // once you have the items, prompt the user for which they'd like to bid on
         
         inquirer
           .prompt([
@@ -113,45 +113,34 @@ function replenishInventory(){
               }
         ])
           .then(function(answer) {
-            // get the information of the chosen item
-            // console.log(answer.select_product);
-            // console.log(answer.add_inventory);
-            
-            var chosenItem;
-            var chosenItemInventory;
-            var updatedInventory
             for (var i = 0; i < results.length; i++) {
-              if (results[i].product_name === answer.select_product) {
-                chosenItem = results[i].product_name;
-                chosenItemInventory = results[i].stock_quantity;
-                updatedInventory = chosenItemInventory + parseInt(answer.add_inventory);
-                // console.log(chosenItem);
-                // console.log(chosenItemInventory);
-                // console.log(updatedInventory);
-              }
+                if (results[i].product_name === answer.select_product) {
+                    var chosenItem = results[i].product_name;
+                    var chosenItemInventory = results[i].stock_quantity;
+                    var updatedInventory = chosenItemInventory + parseInt(answer.add_inventory);
+                    var chosenItemId = results[i].item_id;
+                }
             }
-            /*
             connection.query(
+                
                 "UPDATE products SET ? WHERE ?",
                 [
                   {
-                    highest_bid: answer.bid
+                    stock_quantity: updatedInventory
                   },
                   {
-                    id: chosenItem.id
+                    item_id: chosenItemId
                   }
                 ],
                 function(error) {
                   if (error) throw err;
-                  console.log("Bid placed successfully!");
-                  start();
+                  console.log("Inventory levels successfully updated!");
+                  console.log("New inventory for "+ chosenItem + " is " + updatedInventory);
+                  console.log("\n \n");
+                  console.log("******************************");
+                  startInquiry();
                 }
-              );
-              */
-            
-            
-          });
-         
-      }); 
-      
-}
+            );
+        });
+    }); 
+} 
