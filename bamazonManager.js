@@ -1,8 +1,9 @@
 var mysql = require ("mysql");
 var inquirer = require ("inquirer");
 var colors = require('colors');
+var Table = require('cli-table');
 
-var connection = mysql.createConnection({
+ var connection = mysql.createConnection({
     host:"localhost",
     port:3306,
     user: "root",
@@ -13,7 +14,7 @@ var connection = mysql.createConnection({
 connection.connect(function(err){
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
-    startManagerInquiry();
+    startInquiry();
 });
 
 function startInquiry(){
@@ -35,7 +36,7 @@ function startInquiry(){
         viewLowInventory();
         break;
       
-        case "Replenish inventory Levels":
+        case "Replenish Inventory Levels":
         replenishInventory();
         break;
       
@@ -51,40 +52,47 @@ function viewInventory(){
     connection.query("SELECT item_id, product_name, price, stock_quantity FROM products", function(err,result){
         if (err) throw err;
 
+        var table = new Table({
+          head: ["Id","Item Name","Cost","Quantity"]
+        , colWidths: [5,20,10,10]
+         });   
+
         for (var i = 0; i <result.length; i++){
             var res = result[i];
-            console.log("Item "+ res.item_id + "|" + res.product_name + "|" + res.price + " dollars" + "|" + res.stock_quantity);
+
+        table.push([res.item_id,res.product_name, res.price,res.stock_quantity]);
         }
-        console.log("\n \n");
-        console.log("******************************");
+        console.log(table.toString()+"\n");
+        console.log("***************************************************");
         promptForNextAction();
     });
 }
 
 function viewLowInventory(){
     connection.query("SELECT item_id, product_name,stock_quantity,price FROM products", function(err,result){
-        if (err) throw err;
+		if (err) throw err;
+
+		var table = new Table({
+			head: ["Id","Item Name","Quantity"]
+			, colWidths: [5,20,10]
+
+			});
         for (var i = 0; i <result.length; i++){
-           
-            var lowInventory = result[i].stock_quantity;
-            // console.log(lowInventory);
-            if(lowInventory <100) {
-                console.log("Item "+ result[i].item_id + "| " + result[i].product_name + "| " +  result[i].stock_quantity);
-            } 
-        }
-        console.log("\n \n");
-        console.log("******************************");
+			var lowInventory = result[i].stock_quantity;
+			
+			if(lowInventory <100) {
+				table.push([result[i].item_id,result[i].product_name, result[i].stock_quantity]);
+			} 
+		}
+		console.log(table.toString()+"\n");
+        console.log("*******************************************");
         promptForNextAction();
     });
  }
 
-
-
 function replenishInventory(){
-    connection.query("SELECT * FROM products", function(err, results) {
+	connection.query("SELECT item_id, product_name, stock_quantity, FROM products", function(err, results) {
         if (err) throw err;
-        // console.log(results.length);
-        
         inquirer
           .prompt([
             {
@@ -115,8 +123,11 @@ function replenishInventory(){
             for (var i = 0; i < results.length; i++) {
                 if (results[i].product_name === answer.select_product) {
                     var chosenItem = results[i].product_name;
+
                     var chosenItemInventory = results[i].stock_quantity;
+
                     var updatedInventory = chosenItemInventory + parseInt(answer.add_inventory);
+
                     var chosenItemId = results[i].item_id;
                 }
             }
@@ -134,8 +145,7 @@ function replenishInventory(){
                 function(error) {
                   if (error) throw err;
                   console.log("Inventory levels successfully updated!");
-                  console.log("New inventory for "+ chosenItem + " is " + updatedInventory);
-                  console.log("\n \n");
+                  console.log("\n New inventory for "+ chosenItem + " is " + updatedInventory + "\n");
                   console.log("******************************");
                   promptForNextAction();
                 }

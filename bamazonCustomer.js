@@ -1,6 +1,7 @@
 var mysql = require ("mysql");
 var inquirer = require ("inquirer");
 var colors = require('colors');
+var Table = require('cli-table');
 
 var connection = mysql.createConnection({
     host:"localhost",
@@ -12,7 +13,7 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err){
     if (err) throw err;
-    console.log("connected as id " + connection.threadId);
+    // console.log("connected as id " + connection.threadId);
     displayItems();
 });
 
@@ -20,11 +21,17 @@ function displayItems(){
     console.log("Welcome to 'Bamazon'. Here are the items available for purchase");
     connection.query("SELECT item_id, product_name, price FROM products", function(err,result){
         if (err) throw err;
+        var table = new Table({
+            head: ["ID","Item Name","Cost"]
+          , colWidths: [5,20,10]
+        });    
 
         for (var i = 0; i <result.length; i++){
             var res = result[i];
-            console.log("Item "+ res.item_id + "|" + res.product_name + "|" + res.price + " dollars" );
+            table.push([res.item_id,res.product_name,res.price])
+            // console.log("Item "+ res.item_id + "|" + res.product_name + "|" + res.price + " dollars" );
         }
+        console.log(table.toString()+"\n");
         placeOrder();
     });
 }
@@ -63,12 +70,11 @@ function checkOrder(itemId, itemQty){
         var databaseQty = result[0].stock_quantity;
         var itemCost = result[0].price;
         if (databaseQty<itemQty){
-            console.log("Sorry, insufficient Quantity");
+            console.log("\n Sorry, it appears that there is insufficient quantity. Please tr again soon");
             promptForShopping();
         } else {
             var updateDatabaseQty = databaseQty-itemQty;
-
-            console.log("One moment while your order is being processed");
+            console.log("\n One moment while your order is being processed.");
             updateProductQty(itemId,updateDatabaseQty,itemQty,itemCost);
         }
       
@@ -84,7 +90,7 @@ function updateProductQty(itemId,updatedQty,itemQty,itemCost){
     function(err, res) {
     //   console.log(res.affectedRows + " products updated!\n");
         // var purchasePrice = itemQty * itemCost;
-        console.log("Your total cost is $" + purchasePrice +" . Thank you for your purchase!");
+        console.log("\n  Your total cost is $" + purchasePrice +" . Thank you for your purchase!"+"\n");
         promptForShopping();
     });
 }
