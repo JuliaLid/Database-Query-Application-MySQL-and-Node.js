@@ -3,6 +3,7 @@ var mysql = require ("mysql");
 var inquirer = require ("inquirer");
 var colors = require('colors');
 var Table = require('cli-table');
+
 //Establishing MySQL connection
 var connection = mysql.createConnection({
   host:"localhost",
@@ -15,7 +16,7 @@ var connection = mysql.createConnection({
 connection.connect(function(err){
     if (err) throw err;
     // console.log("connected as id " + connection.threadId);
-    console.log(colors.magenta.bold("Welcome, Manager."));
+    console.log(colors.magenta.bold("Welcome, Manager. \n"));
     startInquiry();
 });
 

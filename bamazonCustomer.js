@@ -73,7 +73,7 @@ function checkOrder(itemId, itemQty){
         var databaseQty = result[0].stock_quantity;
         var itemCost = result[0].price;
         if (databaseQty<itemQty){
-            console.log(colors.yellow.red("\n Sorry, it appears that there is insufficient quantity. Please tr again soon"));
+            console.log(colors.yellow.red("\n Sorry, it appears that there is insufficient quantity. Please try again soon"));
             promptForShopping();
         } else {
             var updateDatabaseQty = databaseQty-itemQty;

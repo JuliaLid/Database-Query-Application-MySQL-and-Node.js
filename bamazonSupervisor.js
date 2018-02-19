@@ -1,8 +1,10 @@
+//Required npm packages
 var mysql = require ("mysql");
 var inquirer = require ("inquirer");
 var colors = require('colors');
 var Table = require('cli-table');
 
+//Establishing MySQL connection
 var connection = mysql.createConnection({
     host:"localhost",
     port:3306,
@@ -13,16 +15,18 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err){
     if (err) throw err;
-    console.log("connected as id " + connection.threadId);
+    // console.log("connected as id " + connection.threadId);
+    console.log(colors.magenta.bold("Welcome, Supervisor. \n"));
     startInquiry();
 });
 
+//Default function to display avaialble action options
 function startInquiry(){
     inquirer
     .prompt({
       name: "report_option",
       type: "rawlist",
-      message: "What would you like to do?",
+      message: colors.yellow.bold("What would you like to do?"),
       choices: ["View Product Sales by Department", "Create New Department" ]
     })
     .then(function(answer) {
@@ -38,15 +42,15 @@ function startInquiry(){
     });
 }
 
+//Funciton to view department sales
 function viewDepartmentSales(){
-  console.log("I work");
     connection.query("SELECT departments.department_id,departments.department_name,departments.over_head_costs, IFNULL(product_sales, 0) AS product_sales FROM products right join departments on products.department_name = departments.department_name group by departments.department_id", function(err,result){
       
       if (err) throw err;
         
         var table = new Table({
             head: ["department_id","department_name","over_head_costs","product_sales","total_profit"]
-          , colWidths: [10,20,20,20,20]
+          , colWidths: [20,20,20,20,20]
         });      
 
         for (var i = 0; i <result.length; i++){
@@ -55,24 +59,25 @@ function viewDepartmentSales(){
             table.push([result[i].department_id,result[i].department_name, result[i].over_head_costs, result[i].product_sales,total_profit]);
             
         }
-        console.log(table.toString());
-        console.log("\n");
+        console.log(colors.green.bold(table.toString()+"\n"));
+        console.log(colors.yellow.bold("***************************************************"));
         promptForNextAction();
     });
 }
 
+//Function to add a new department 
 function createNewDepartment(){
     inquirer
     .prompt([
       {
         name: "department",
         type: "input",
-        message: "Specify the new department name: "
+        message: colors.yellow.bold("Specify the new department name: ")
       },
       {
         name: "cost",
         type: "input",
-        message: "Specify the new department's overhead cost: "
+        message: colors.yellow.bold("Specify the new department's overhead cost: ")
       }
       
     ])
@@ -85,30 +90,30 @@ function createNewDepartment(){
         },
         function(err) {
           if (err) throw err;
-          console.log("New department  has been successfully added!");
-          console.log("\n");
-          console.log("******************************");
+          console.log(colors.green.bold("New department  has been successfully added!" + "\n"));
+          console.log(colors.yellow.bold("*******************************************"));
           promptForNextAction();
         }
       );
    });
 }
 
+//Function to allow supervisor to end the session or return to the main menu
 var promptForNextAction = function(){
     inquirer.prompt([
         {
           name:"action",
           type: "confirm",
-          message: "Would you like to see the main menu?",
+          message:colors.yellow.bold("Would you like to see the main menu?"),
         } 
     ])
     .then(function(answer){
         if(answer.action===true){
             console.log("\n \n");
-             console.log("******************************");
+            console.log(colors.yellow.bold("*******************************************"));
             startInquiry();
          } else {
-            console.log(colors.yellow.bold("Thank you! Good bye!"));
+            console.log(colors.magenta.bold("Thank you! Good bye!"));
             connection.end();
         }
     });
