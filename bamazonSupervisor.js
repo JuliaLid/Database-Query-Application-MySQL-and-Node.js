@@ -63,6 +63,40 @@ function viewDepartmentSales(){
     });
 }
 
+function createNewSepartment(){
+    inquirer
+    .prompt([
+      {
+        name: "department",
+        type: "input",
+        message: "Specify the new department name: "
+      },
+      {
+        name: "cost",
+        type: "input",
+        message: "Specify the new department's overhead cost: "
+      }
+      
+    ])
+    .then(function(answer) {
+    console.log(answer);
+         connection.query(
+        "INSERT INTO departments SET ?",
+        {
+          department_name: answer.department,
+          over_head_costs: answer.cost,
+        },
+        function(err) {
+          if (err) throw err;
+          console.log("New department  has been successfully added!");
+          console.log("\n");
+          console.log("******************************");
+          promptForNextAction();
+        }
+      );
+   });
+}
+
 function promptForNextAction(){
     inquirer.prompt([
         {
