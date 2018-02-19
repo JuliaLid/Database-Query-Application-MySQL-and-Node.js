@@ -51,7 +51,7 @@ function placeOrder(){
     .then(function(answer){
         var itemId = answer.id;
         var itemQty = answer.item_qty;
-        console.log(itemId, itemQty);
+        // console.log(itemId, itemQty);
         checkOrder(itemId,itemQty);
     })
 }
@@ -64,6 +64,7 @@ function checkOrder(itemId, itemQty){
         var itemCost = result[0].price;
         if (databaseQty<itemQty){
             console.log("Sorry, insufficient Quantity");
+            promptForShopping();
         } else {
             var updateDatabaseQty = databaseQty-itemQty;
 
@@ -75,19 +76,14 @@ function checkOrder(itemId, itemQty){
 }
 
 function updateProductQty(itemId,updatedQty,itemQty,itemCost){
+    var purchasePrice = itemQty * itemCost;
+ 
     var query = connection.query(
-    "UPDATE products SET ? WHERE ?",
-    [
-      {
-        stock_quantity:updatedQty
-      },
-      {
-        item_id: itemId
-      }
-    ],
+    "UPDATE products SET stock_quantity =?, product_sales=? WHERE item_id= ?",
+    [updatedQty,purchasePrice,itemId], 
     function(err, res) {
     //   console.log(res.affectedRows + " products updated!\n");
-        var purchasePrice = itemQty * itemCost;
+        // var purchasePrice = itemQty * itemCost;
         console.log("Your total cost is $" + purchasePrice +" . Thank you for your purchase!");
         promptForShopping();
     });
