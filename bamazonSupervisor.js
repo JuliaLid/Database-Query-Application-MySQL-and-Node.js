@@ -26,42 +26,42 @@ function startInquiry(){
       choices: ["View Product Sales by Department", "Create New Department" ]
     })
     .then(function(answer) {
-     //   console.log(answer.report_option);
       switch (answer.report_option) {
         case "View Product Sales by Department":
         viewDepartmentSales();
         break;
       
         case "Create New Department":
-        createNewSepartment();
+        createNewDepartment();
         break;
       }
     });
 }
 
 function viewDepartmentSales(){
-    connection.query("SELECT departments.department_id,departments.department_name,departments.over_head_costs,  sum(product_sales) AS product_sales FROM products right join departments on products.department_name = departments.department_name group by departments.department_id", function(err,result){
-        if (err) throw err;
+  console.log("I work");
+    connection.query("SELECT departments.department_id,departments.department_name,departments.over_head_costs, IFNULL(product_sales, 0) AS product_sales FROM products right join departments on products.department_name = departments.department_name group by departments.department_id", function(err,result){
+      
+      if (err) throw err;
         
         var table = new Table({
             head: ["department_id","department_name","over_head_costs","product_sales","total_profit"]
-          , colWidths: [20,20,20,20,20]
+          , colWidths: [10,20,20,20,20]
         });      
 
         for (var i = 0; i <result.length; i++){
            var total_profit = result[i].over_head_costs - result[i].product_sales;
-            // console.log(lowInventory);
            
-             table.push([result[i].department_id,result[i].department_name, result[i].over_head_costs, result[i].product_sales,total_profit]);
+            table.push([result[i].department_id,result[i].department_name, result[i].over_head_costs, result[i].product_sales,total_profit]);
             
         }
         console.log(table.toString());
-        console.log("\n \n");
+        console.log("\n");
         promptForNextAction();
     });
 }
 
-function createNewSepartment(){
+function createNewDepartment(){
     inquirer
     .prompt([
       {
@@ -77,7 +77,6 @@ function createNewSepartment(){
       
     ])
     .then(function(answer) {
-    console.log(answer);
          connection.query(
         "INSERT INTO departments SET ?",
         {
@@ -95,7 +94,7 @@ function createNewSepartment(){
    });
 }
 
-function promptForNextAction(){
+var promptForNextAction = function(){
     inquirer.prompt([
         {
           name:"action",
@@ -114,3 +113,4 @@ function promptForNextAction(){
         }
     });
 }
+

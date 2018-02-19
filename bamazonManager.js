@@ -91,7 +91,7 @@ function viewLowInventory(){
  }
 
 function replenishInventory(){
-	connection.query("SELECT item_id, product_name, stock_quantity, FROM products", function(err, results) {
+	connection.query("SELECT item_id, product_name, stock_quantity FROM products", function(err, results) {
         if (err) throw err;
         inquirer
           .prompt([
@@ -185,14 +185,15 @@ function addNewProduct(){
       } 
     ])
     .then(function(answer) {
-    console.log(answer);
+    // console.log(answer);
          connection.query(
         "INSERT INTO products SET ?",
         {
           product_name: answer.item,
           department_name: answer.department,
           price: answer.price,
-          stock_quantity: answer.quantity
+          stock_quantity: answer.quantity,
+          product_sales:0
         },
         function(err) {
           if (err) throw err;
@@ -224,4 +225,5 @@ function promptForNextAction(){
         }
     });
 }
+
 
