@@ -110,7 +110,7 @@ function promptForShopping(){
         if(answer.shopping===true){
             displayItems();
          } else {
-            console.log(colors.yellow.bold("Thanks for shopping with us. Please visit us again soon!"));
+            console.log(colors.magenta.bold("Thanks for shopping with us. Please visit us again soon!"));
             connection.end();
         }
     });
