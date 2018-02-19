@@ -13,7 +13,7 @@ var connection = mysql.createConnection({
 connection.connect(function(err){
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
-    startInquiry();
+    startManagerInquiry();
 });
 
 function startInquiry(){
@@ -22,25 +22,24 @@ function startInquiry(){
       name: "report_option",
       type: "rawlist",
       message: "What would you like to do?",
-      choices: ["View Current Inventory report", "View Low Inventory report","Replenish inventory levels","Add new product" ]
+      choices: ["View Current Inventory Report", "View Low Inventory Report","Replenish Inventory Levels","Add New Product" ]
     })
     .then(function(answer) {
-      // based on their answer, either call the bid or the post functions
     //   console.log(answer.report_option);
       switch (answer.report_option) {
-        case "View Current Inventory report":
+        case "View Current Inventory Report":
         viewInventory();
         break;
       
-        case "View Low Inventory report":
+        case "View Low Inventory Report":
         viewLowInventory();
         break;
       
-        case "Replenish inventory levels":
+        case "Replenish inventory Levels":
         replenishInventory();
         break;
       
-        case "Add new product":
+        case "Add New Product":
         addNewProduct();
         break; 
       }
@@ -215,3 +214,4 @@ function promptForNextAction(){
         }
     });
 }
+
